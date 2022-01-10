@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: reddy-testpmd
+spec:
+  containers:
+  - command:
+    - sh
+    - -c
+    - sleep 200d
+    image: registry.ngxp.sio.ericsson.com:5000/testpmd
+    name: testpmd
+    resources:
+      limits:
+        intel.com/intel_sriov_dpdk: "2"
+        hugepages-2Mi: 4Gi
+        cpu: '4'
+        memory: 4000Mi
+      requests:
+        intel.com/intel_sriov_dpdk: "2"
+        hugepages-2Mi: 4Gi
+        cpu: '4'
+        memory: 4000Mi
+    securityContext:
+      privileged: true
+      capabilities:
+        add: ["SYS_ADMIN", "IPC_LOCK"]
+    volumeMounts:
+      - mountPath: /dev/hugepages
+        name: hugepage
+        readOnly: False
+      - mountPath: /sys
+        name: sysfs
+  volumes:
+  - name: hugepage
+    emptyDir:
+      medium: HugePages
+  - name: sysfs
+    hostPath:
+      path: /sys
+  nodeSelector:
+    kubernetes.io/hostname: ngxp-worker-01
